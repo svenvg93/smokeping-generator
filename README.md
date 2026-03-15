@@ -1,74 +1,42 @@
-# React + TypeScript + Vite
+# SmokePing Generator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A browser-based visual editor for generating [SmokePing](https://oss.oetiker.ch/smokeping/) configuration files. Build your probe and target hierarchy interactively, then copy the generated config directly into your SmokePing setup.
 
-Currently, two official plugins are available:
+**Live app:** [svenvg93.github.io/smokeping-generator](https://svenvg93.github.io/smokeping-generator)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- **Visual target tree** — build a Section → Group → Target hierarchy with drag-and-drop reordering
+- **Dual-stack support** — configure separate IPv4 and IPv6 hosts per target or group, with optional combined charts
+- **Probe management** — define multiple probe types (FPing, DNS, HTTP, Curl, TCPPing, and more) with custom binaries and extra fields
+- **Import / Export** — import existing SmokePing `.conf` files, JSON, or YAML; export to all three formats
+- **Live preview** — the Configuration tab updates in real time as you make changes
+- **Persisted state** — configuration is saved to `localStorage` and survives page reloads
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Usage
 
-## Expanding the ESLint configuration
+1. Open the app and configure your **Global Settings** (default probe, menu label, title)
+2. Switch to the **Probes** tab to define your probe types
+3. Switch to the **Targets** tab to build your target hierarchy
+4. Switch to the **Configuration** tab to copy the generated SmokePing config
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Importing an existing config
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Click the upload icon in the top-left of the Targets tree to import a `.conf`, `.json`, or `.yaml` file. The app will parse it and populate the editor.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Development
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Requires Node.js 18+. Built with React 19, TypeScript, Vite, Tailwind CSS, and shadcn/ui.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Deployment
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+The app deploys automatically to GitHub Pages on every push to `master` via GitHub Actions.
+
+```bash
+npm run build   # outputs to dist/
 ```
-# smokeping-generator

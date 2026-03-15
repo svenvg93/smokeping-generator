@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Activity, Github } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
@@ -14,6 +14,21 @@ import { GITHUB_REPO_URL } from '@/lib/constants'
 export default function App() {
   const { config, dispatch, preview } = useSmokePingStore()
   const [selection, setSelection] = useState<Selection>({ kind: 'globals' })
+  const selectionRef = useRef(selection)
+  selectionRef.current = selection
+
+  useEffect(() => {
+    const sel = selectionRef.current
+    if (sel.kind === 'globals') return
+    const section = config.sections.find((s) => s.id === sel.sectionId)
+    if (!section) { setSelection({ kind: 'globals' }); return }
+    if (sel.kind === 'section') return
+    const group = section.groups.find((g) => g.id === sel.groupId)
+    if (!group) { setSelection({ kind: 'globals' }); return }
+    if (sel.kind === 'group') return
+    const target = group.targets.find((t) => t.id === sel.targetId)
+    if (!target) setSelection({ kind: 'globals' })
+  }, [config])
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -62,7 +77,7 @@ export default function App() {
           </TabsContent>
 
           <TabsContent value="probes" className="mt-0">
-            <ProbesTab probes={config.probes} dispatch={dispatch} />
+            <ProbesTab probes={config.probes} sections={config.sections} dispatch={dispatch} />
           </TabsContent>
 
           <TabsContent value="preview" className="mt-0 data-[state=inactive]:hidden" forceMount>

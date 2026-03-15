@@ -25,6 +25,7 @@ interface ProbeFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   probe: Probe | null
+  existingNames: string[]
   onSave: (probe: Probe) => void
 }
 
@@ -38,7 +39,7 @@ const defaultProbe = (): Probe => ({
   extraFields: {},
 })
 
-export function ProbeFormDialog({ open, onOpenChange, probe, onSave }: ProbeFormDialogProps) {
+export function ProbeFormDialog({ open, onOpenChange, probe, existingNames, onSave }: ProbeFormDialogProps) {
   const [form, setForm] = useState<Probe>(defaultProbe)
 
   useEffect(() => {
@@ -55,7 +56,10 @@ export function ProbeFormDialog({ open, onOpenChange, probe, onSave }: ProbeForm
     }))
   }
 
+  const isDuplicateName = existingNames.includes(form.name.trim())
+
   function handleSave() {
+    if (isDuplicateName) return
     onSave(form)
     onOpenChange(false)
   }
@@ -75,7 +79,11 @@ export function ProbeFormDialog({ open, onOpenChange, probe, onSave }: ProbeForm
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="FPing"
+                className={isDuplicateName ? 'border-destructive' : ''}
               />
+              {isDuplicateName && (
+                <p className="text-xs text-destructive">A probe with this name already exists</p>
+              )}
             </div>
             <div className="flex flex-col gap-1.5">
               <Label>Type</Label>
@@ -138,7 +146,7 @@ export function ProbeFormDialog({ open, onOpenChange, probe, onSave }: ProbeForm
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSave}>Save</Button>
+          <Button onClick={handleSave} disabled={isDuplicateName}>Save</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

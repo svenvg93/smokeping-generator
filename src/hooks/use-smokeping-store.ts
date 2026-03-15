@@ -1,4 +1,5 @@
 import { useReducer, useMemo, useEffect } from 'react'
+import { toast } from 'sonner'
 import type {
   SmokePingConfig,
   TargetSection,
@@ -10,6 +11,13 @@ import type {
 import { generateConfig } from '@/lib/generate'
 
 const STORAGE_KEY = 'smokeping-config'
+
+function uniqueName(base: string, existing: string[]): string {
+  if (!existing.includes(base)) return base
+  let i = 2
+  while (existing.includes(`${base} ${i}`)) i++
+  return `${base} ${i}`
+}
 
 const initialConfig: SmokePingConfig = {
   targetGlobals: {
@@ -76,20 +84,16 @@ function reducer(state: SmokePingConfig, action: Action): SmokePingConfig {
     case 'UPDATE_TARGET_GLOBALS':
       return { ...state, targetGlobals: { ...state.targetGlobals, ...action.payload } }
 
-    case 'ADD_SECTION':
+    case 'ADD_SECTION': {
+      const key = uniqueName('NewSection', state.sections.map((s) => s.key))
       return {
         ...state,
         sections: [
           ...state.sections,
-          {
-            id: crypto.randomUUID(),
-            key: 'NewSection',
-            menu: 'New Section',
-            title: 'New Section',
-            groups: [],
-          },
+          { id: crypto.randomUUID(), key, menu: key, title: key, groups: [] },
         ],
       }
+    }
 
     case 'UPDATE_SECTION':
       return {
@@ -102,28 +106,19 @@ function reducer(state: SmokePingConfig, action: Action): SmokePingConfig {
     case 'DELETE_SECTION':
       return { ...state, sections: state.sections.filter((s) => s.id !== action.id) }
 
-    case 'ADD_GROUP':
+    case 'ADD_GROUP': {
       return {
         ...state,
-        sections: state.sections.map((s) =>
-          s.id === action.sectionId
-            ? {
-                ...s,
-                groups: [
-                  ...s.groups,
-                  {
-                    id: crypto.randomUUID(),
-                    key: 'NewGroup',
-                    menu: 'New Group',
-                    title: 'New Group',
-                    extraFields: {},
-                    targets: [],
-                  },
-                ],
-              }
-            : s
-        ),
+        sections: state.sections.map((s) => {
+          if (s.id !== action.sectionId) return s
+          const key = uniqueName('NewGroup', s.groups.map((g) => g.key))
+          return {
+            ...s,
+            groups: [...s.groups, { id: crypto.randomUUID(), key, menu: key, title: key, extraFields: {}, targets: [] }],
+          }
+        }),
       }
+    }
 
     case 'UPDATE_GROUP':
       return {
@@ -150,35 +145,25 @@ function reducer(state: SmokePingConfig, action: Action): SmokePingConfig {
         ),
       }
 
-    case 'ADD_TARGET':
+    case 'ADD_TARGET': {
       return {
         ...state,
-        sections: state.sections.map((s) =>
-          s.id === action.sectionId
-            ? {
-                ...s,
-                groups: s.groups.map((g) =>
-                  g.id === action.groupId
-                    ? {
-                        ...g,
-                        targets: [
-                          ...g.targets,
-                          {
-                            id: crypto.randomUUID(),
-                            key: 'NewTarget',
-                            menu: 'New Target',
-                            title: 'New Target',
-                            host: '0.0.0.0',
-                            extraFields: {},
-                          },
-                        ],
-                      }
-                    : g
-                ),
+        sections: state.sections.map((s) => {
+          if (s.id !== action.sectionId) return s
+          return {
+            ...s,
+            groups: s.groups.map((g) => {
+              if (g.id !== action.groupId) return g
+              const key = uniqueName('NewTarget', g.targets.map((t) => t.key))
+              return {
+                ...g,
+                targets: [...g.targets, { id: crypto.randomUUID(), key, menu: key, title: key, host: '', extraFields: {} }],
               }
-            : s
-        ),
+            }),
+          }
+        }),
       }
+    }
 
     case 'UPDATE_TARGET':
       return {
@@ -274,7 +259,7 @@ export function useSmokePingStore() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(config))
     } catch {
-      // ignore
+      toast.warning('Could not save configuration — local storage may be full or unavailable')
     }
   }, [config])
 

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Plus, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -10,7 +11,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { ExtraFieldsEditor } from '@/components/extra-fields-editor'
+import { cn } from '@/lib/utils'
 import type { SmokePingConfig, Selection, TargetGroup, Target } from '@/lib/types'
 import type { Action } from '@/hooks/use-smokeping-store'
 
@@ -46,8 +58,39 @@ function DualStackHostField({
   keyName, optional = false,
 }: DualStackHostFieldProps) {
   const isDualStack = ipv6Host !== undefined
+  const [showClearConfirm, setShowClearConfirm] = useState(false)
+
+  function handleToggle() {
+    if (isDualStack) {
+      if (ipv6Host) {
+        setShowClearConfirm(true)
+      } else {
+        onIpv6HostChange(undefined)
+        onShowCombinedChange(undefined)
+      }
+    } else {
+      onIpv6HostChange('')
+    }
+  }
 
   return (
+    <>
+    <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Remove IPv6 host?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will discard the IPv6 host address "{ipv6Host}" and any combined chart setting.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={() => { onIpv6HostChange(undefined); onShowCombinedChange(undefined) }}>
+            Remove
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <Label>
@@ -56,14 +99,7 @@ function DualStackHostField({
         </Label>
         <button
           type="button"
-          onClick={() => {
-            if (isDualStack) {
-              onIpv6HostChange(undefined)
-              onShowCombinedChange(undefined)
-            } else {
-              onIpv6HostChange('')
-            }
-          }}
+          onClick={handleToggle}
           className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border transition-colors ${
             isDualStack
               ? 'bg-primary text-primary-foreground border-primary'
@@ -149,6 +185,7 @@ function DualStackHostField({
         />
       )}
     </div>
+    </>
   )
 }
 
@@ -178,11 +215,9 @@ function ProbeSelect({ value, probeNames, onChange }: ProbeSelectProps) {
           </SelectContent>
         </Select>
       ) : (
-        <Input
-          value={value ?? ''}
-          onChange={(e) => onChange(e.target.value || undefined)}
-          placeholder="Use global default"
-        />
+        <p className="text-xs text-muted-foreground py-1">
+          No probes configured — add one in the Probes tab to enable override.
+        </p>
       )}
     </div>
   )
@@ -251,9 +286,10 @@ export function TargetForm({ selection, config, dispatch }: TargetFormProps) {
           <Input
             value={section.key}
             onChange={(e) => dispatch({ type: 'UPDATE_SECTION', id: section.id, payload: { key: e.target.value } })}
-            className="font-mono"
+            className={cn('font-mono', !section.key.trim() && 'border-destructive')}
             placeholder="Internet"
           />
+          {!section.key.trim() && <p className="text-xs text-destructive">Key cannot be empty</p>}
         </div>
         <div className="flex flex-col gap-1.5">
           <Label>Menu label</Label>
@@ -301,9 +337,10 @@ export function TargetForm({ selection, config, dispatch }: TargetFormProps) {
           <Input
             value={group.key}
             onChange={(e) => upd({ key: e.target.value })}
-            className="font-mono"
+            className={cn('font-mono', !group.key.trim() && 'border-destructive')}
             placeholder="ISP_A"
           />
+          {!group.key.trim() && <p className="text-xs text-destructive">Key cannot be empty</p>}
         </div>
 
         <DualStackHostField
@@ -374,9 +411,10 @@ export function TargetForm({ selection, config, dispatch }: TargetFormProps) {
           <Input
             value={target.key}
             onChange={(e) => upd({ key: e.target.value })}
-            className="font-mono"
+            className={cn('font-mono', !target.key.trim() && 'border-destructive')}
             placeholder="Gateway"
           />
+          {!target.key.trim() && <p className="text-xs text-destructive">Key cannot be empty</p>}
         </div>
 
         <DualStackHostField

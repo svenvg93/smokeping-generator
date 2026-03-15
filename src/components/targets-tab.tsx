@@ -80,7 +80,9 @@ export function TargetsTab({ config, selection, onSelect, dispatch }: TargetsTab
       try {
         const imported = importFromText(ev.target?.result as string)
         dispatch({ type: 'LOAD_CONFIG', payload: imported })
-        toast.success('Config imported successfully')
+        const totalGroups = imported.sections.reduce((n, s) => n + s.groups.length, 0)
+        const totalTargets = imported.sections.reduce((n, s) => s.groups.reduce((m, g) => m + g.targets.length, n), 0)
+        toast.success(`Imported ${imported.sections.length} section${imported.sections.length !== 1 ? 's' : ''}, ${totalGroups} group${totalGroups !== 1 ? 's' : ''}, ${totalTargets} target${totalTargets !== 1 ? 's' : ''}`)
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Import failed')
       }

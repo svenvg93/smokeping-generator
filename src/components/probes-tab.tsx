@@ -23,15 +23,16 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { ProbeFormDialog } from '@/components/probe-form-dialog'
-import type { Probe } from '@/lib/types'
+import type { Probe, TargetSection } from '@/lib/types'
 import type { Action } from '@/hooks/use-smokeping-store'
 
 interface ProbesTabProps {
   probes: Probe[]
+  sections: TargetSection[]
   dispatch: (action: Action) => void
 }
 
-export function ProbesTab({ probes, dispatch }: ProbesTabProps) {
+export function ProbesTab({ probes, sections, dispatch }: ProbesTabProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingProbe, setEditingProbe] = useState<Probe | null>(null)
 
@@ -128,8 +129,25 @@ export function ProbesTab({ probes, dispatch }: ProbesTabProps) {
                           <AlertDialogContent>
                             <AlertDialogHeader>
                               <AlertDialogTitle>Delete probe "{probe.name}"?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This will remove the probe and any targets using it will lose their probe override.
+                              <AlertDialogDescription asChild>
+                                <div className="flex flex-col gap-1.5">
+                                  <span>This will permanently remove this probe definition.</span>
+                                  {(() => {
+                                    const affected = sections.flatMap((s) =>
+                                      s.groups.flatMap((g) => [
+                                        ...g.targets.filter((t) => t.probe === probe.name).map((t) => `${s.key} / ${g.key} / ${t.key}`),
+                                        ...(g.probe === probe.name ? [`${s.key} / ${g.key} (group)`] : []),
+                                      ])
+                                    )
+                                    if (affected.length === 0) return null
+                                    return (
+                                      <span className="text-foreground">
+                                        {affected.length} target{affected.length !== 1 ? 's' : ''} reference this probe and will lose their override:{' '}
+                                        <span className="font-mono text-xs">{affected.join(', ')}</span>
+                                      </span>
+                                    )
+                                  })()}
+                                </div>
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -156,6 +174,7 @@ export function ProbesTab({ probes, dispatch }: ProbesTabProps) {
           open={dialogOpen}
           onOpenChange={setDialogOpen}
           probe={editingProbe}
+          existingNames={probes.filter((p) => p.id !== editingProbe?.id).map((p) => p.name)}
           onSave={handleSave}
         />
       </div>

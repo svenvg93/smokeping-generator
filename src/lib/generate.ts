@@ -24,13 +24,16 @@ function generateTargetsSection(globals: TargetGlobals, sections: TargetSection[
   out += `probe = ${globals.probe}\n\n`
 
   for (const section of sections) {
+    const validGroups = section.groups.filter((g) => g.targets.length > 0 || !!g.host)
+    if (validGroups.length === 0) continue
+
     out += `+ ${section.key}\n`
     out += `menu = ${section.menu}\n`
     out += `title = ${section.title}\n`
     if (section.remark) out += `remark = ${section.remark}\n`
     out += '\n'
 
-    for (const group of section.groups) {
+    for (const group of validGroups) {
       const groupKey = group.ipv6Host !== undefined ? `${group.key}_v4` : group.key
       out += `++ ${groupKey}\n`
       out += `menu = ${group.menu}${group.ipv6Host !== undefined ? ' (IPv4)' : ''}\n`
