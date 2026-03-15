@@ -6,7 +6,6 @@ import type {
   TargetSection,
   TargetGroup,
 } from './types'
-import { generateConfig } from './generate'
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -244,14 +243,4 @@ export function importFromText(text: string): SmokePingConfig {
     throw new Error('Invalid config: expected a SmokePing file')
   }
   return importFromSmokePingConf(trimmed)
-}
-
-export function downloadFile(content: string, filename: string, mimeType: string) {
-  const blob = new Blob([content], { type: mimeType })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  a.click()
-  URL.revokeObjectURL(url)
 }
