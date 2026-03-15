@@ -1,4 +1,4 @@
-import type { SmokePingConfig, Probe, Alert, AlertGlobals, TargetGlobals, TargetSection } from './types'
+import type { SmokePingConfig, Probe, TargetGlobals, TargetSection } from './types'
 
 function generateProbesSection(probes: Probe[]): string {
   if (probes.length === 0) return ''
@@ -10,31 +10,6 @@ function generateProbesSection(probes: Probe[]): string {
     out += `pings = ${probe.pings}\n`
     out += `step = ${probe.step}\n`
     for (const [k, v] of Object.entries(probe.extraFields ?? {})) {
-      if (k && v) out += `${k} = ${v}\n`
-    }
-    out += '\n'
-  }
-  return out
-}
-
-function generateAlertsSection(globals: AlertGlobals, alerts: Alert[]): string {
-  if (!globals.to && !globals.from && alerts.length === 0) return ''
-
-  let out = '*** Alerts ***\n\n'
-  if (globals.to) out += `to = ${globals.to}\n`
-  if (globals.from) out += `from = ${globals.from}\n`
-  if (globals.to || globals.from) out += '\n'
-
-  for (const alert of alerts) {
-    out += `+${alert.name}\n`
-    out += `type = ${alert.type}\n`
-    if (alert.type === 'matcher' && alert.matcher) {
-      out += `matcher = ${alert.matcher}\n`
-    } else {
-      out += `pattern = ${alert.pattern}\n`
-    }
-    if (alert.comment) out += `comment = ${alert.comment}\n`
-    for (const [k, v] of Object.entries(alert.extraFields ?? {})) {
       if (k && v) out += `${k} = ${v}\n`
     }
     out += '\n'
@@ -63,9 +38,6 @@ function generateTargetsSection(globals: TargetGlobals, sections: TargetSection[
       if (group.host) out += `host = ${group.host}\n`
       if (group.remark) out += `remark = ${group.remark}\n`
       if (group.probe) out += `probe = ${group.probe}\n`
-      if (group.alerts && group.alerts.length > 0) {
-        out += `alerts = ${group.alerts.join(',')}\n`
-      }
       for (const [k, v] of Object.entries(group.extraFields ?? {})) {
         if (k && v) out += `${k} = ${v}\n`
       }
@@ -99,9 +71,6 @@ function generateTargetsSection(globals: TargetGlobals, sections: TargetSection[
         out += `host = ${target.host}\n`
         if (target.remark) out += `remark = ${target.remark}\n`
         if (target.probe) out += `probe = ${target.probe}\n`
-        if (target.alerts && target.alerts.length > 0) {
-          out += `alerts = ${target.alerts.join(',')}\n`
-        }
         for (const [k, v] of Object.entries(target.extraFields ?? {})) {
           if (k && v) out += `${k} = ${v}\n`
         }
@@ -138,9 +107,6 @@ export function generateConfig(config: SmokePingConfig): string {
 
   const probes = generateProbesSection(config.probes)
   if (probes) parts.push(probes)
-
-  const alerts = generateAlertsSection(config.alertGlobals, config.alerts)
-  if (alerts) parts.push(alerts)
 
   parts.push(generateTargetsSection(config.targetGlobals, config.sections))
 

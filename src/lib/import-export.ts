@@ -3,9 +3,6 @@ import type {
   SmokePingConfig,
   Probe,
   ProbeType,
-  Alert,
-  AlertType,
-  AlertGlobals,
   TargetGlobals,
   TargetSection,
   TargetGroup,
@@ -75,45 +72,6 @@ function parseProbesSection(lines: string[]): Probe[] {
   return probes
 }
 
-function parseAlertsSection(lines: string[]): { alertGlobals: AlertGlobals; alerts: Alert[] } {
-  const alertGlobals: AlertGlobals = { to: '', from: '' }
-  const alerts: Alert[] = []
-  let name = '', type: AlertType = 'loss', pattern = '', matcher = '', comment = ''
-  let extra: Record<string, string> = {}
-  let active = false
-
-  const flush = () => {
-    if (!active) return
-    const alert: Alert = { id: crypto.randomUUID(), name, type, pattern, comment, extraFields: extra }
-    if (type === 'matcher' && matcher) alert.matcher = matcher
-    alerts.push(alert)
-  }
-
-  for (const line of lines) {
-    if (/^\+[^+]/.test(line)) {
-      flush()
-      name = line.slice(1).trim()
-      type = 'loss'; pattern = ''; matcher = ''; comment = ''; extra = {}; active = true
-    } else {
-      const kv = parseKV(line)
-      if (!kv) continue
-      const [k, v] = kv
-      if (!active) {
-        if (k === 'to') alertGlobals.to = v
-        else if (k === 'from') alertGlobals.from = v
-      } else {
-        if (k === 'type') type = v as AlertType
-        else if (k === 'pattern') pattern = v
-        else if (k === 'matcher') matcher = v
-        else if (k === 'comment') comment = v
-        else extra[k] = v
-      }
-    }
-  }
-  flush()
-  return { alertGlobals, alerts }
-}
-
 type ParsedNode = { level: 1 | 2 | 3; key: string; fields: Record<string, string> }
 
 function parseTargetsSection(lines: string[]): { targetGlobals: TargetGlobals; sections: TargetSection[] } {
@@ -143,8 +101,8 @@ function parseTargetsSection(lines: string[]): { targetGlobals: TargetGlobals; s
   }
   if (current) nodes.push(current)
 
-  const KNOWN_GROUP = ['menu', 'title', 'host', 'remark', 'probe', 'alerts']
-  const KNOWN_TARGET = ['menu', 'title', 'host', 'remark', 'probe', 'alerts']
+  const KNOWN_GROUP = ['menu', 'title', 'host', 'remark', 'probe']
+  const KNOWN_TARGET = ['menu', 'title', 'host', 'remark', 'probe']
 
   const sections: TargetSection[] = []
   let currentSection: TargetSection | null = null
@@ -194,7 +152,6 @@ function parseTargetsSection(lines: string[]): { targetGlobals: TargetGlobals; s
         host: node.fields.host,
         remark: node.fields.remark,
         probe: node.fields.probe,
-        alerts: node.fields.alerts ? node.fields.alerts.split(',').map(s => s.trim()) : undefined,
         extraFields: extraFields(node.fields, KNOWN_GROUP),
         targets: [],
       }
@@ -231,7 +188,6 @@ function parseTargetsSection(lines: string[]): { targetGlobals: TargetGlobals; s
         host: node.fields.host ?? '',
         remark: node.fields.remark,
         probe: node.fields.probe,
-        alerts: node.fields.alerts ? node.fields.alerts.split(',').map(s => s.trim()) : undefined,
         extraFields: extraFields(node.fields, KNOWN_TARGET),
       })
     }
@@ -274,14 +230,11 @@ function importFromSmokePingConf(text: string): SmokePingConfig {
   }
 
   const probes = sectionMap.probes ? parseProbesSection(sectionMap.probes) : []
-  const { alertGlobals, alerts } = sectionMap.alerts
-    ? parseAlertsSection(sectionMap.alerts)
-    : { alertGlobals: { to: '', from: '' }, alerts: [] }
   const { targetGlobals, sections } = sectionMap.targets
     ? parseTargetsSection(sectionMap.targets)
     : { targetGlobals: { probe: 'FPing', menu: 'Top', title: 'Network Latency Grapher' }, sections: [] }
 
-  return { probes, alertGlobals, alerts, targetGlobals, sections }
+  return { probes, targetGlobals, sections }
 }
 
 // ── Public API ─────────────────────────────────────────────────────────────
@@ -305,7 +258,6 @@ export function importFromText(text: string): SmokePingConfig {
     const parsed = JSON.parse(trimmed) as SmokePingConfig
     if (!Array.isArray(parsed.sections)) throw new Error('Invalid config: missing sections')
     if (!Array.isArray(parsed.probes)) throw new Error('Invalid config: missing probes')
-    if (!Array.isArray(parsed.alerts)) throw new Error('Invalid config: missing alerts')
     return parsed
   }
 
@@ -318,7 +270,6 @@ export function importFromText(text: string): SmokePingConfig {
   if (!parsed || typeof parsed !== 'object') throw new Error('Invalid config: expected an object')
   if (!Array.isArray(parsed.sections)) throw new Error('Invalid config: missing sections')
   if (!Array.isArray(parsed.probes)) throw new Error('Invalid config: missing probes')
-  if (!Array.isArray(parsed.alerts)) throw new Error('Invalid config: missing alerts')
   return parsed
 }
 

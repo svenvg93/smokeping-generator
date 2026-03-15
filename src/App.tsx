@@ -8,7 +8,6 @@ import { useSmokePingStore } from '@/hooks/use-smokeping-store'
 import type { Selection } from '@/lib/types'
 import { TargetsTab } from '@/components/targets-tab'
 import { ProbesTab } from '@/components/probes-tab'
-import { AlertsTab } from '@/components/alerts-tab'
 import { PreviewTab } from '@/components/preview-tab'
 import { GITHUB_REPO_URL } from '@/lib/constants'
 
@@ -50,14 +49,6 @@ export default function App() {
                 </Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="alerts" className="gap-2">
-              Alerts
-              {config.alerts.length > 0 && (
-                <Badge variant="secondary" className="h-4 min-w-4 px-1 text-[10px]">
-                  {config.alerts.length}
-                </Badge>
-              )}
-            </TabsTrigger>
             <TabsTrigger value="preview">Configuration</TabsTrigger>
           </TabsList>
 
@@ -72,15 +63,6 @@ export default function App() {
 
           <TabsContent value="probes" className="mt-0">
             <ProbesTab probes={config.probes} dispatch={dispatch} />
-          </TabsContent>
-
-          <TabsContent value="alerts" className="mt-0">
-            <AlertsTab
-              alertGlobals={config.alertGlobals}
-              alerts={config.alerts}
-              probeNames={config.probes.map((p) => p.name)}
-              dispatch={dispatch}
-            />
           </TabsContent>
 
           <TabsContent value="preview" className="mt-0 data-[state=inactive]:hidden" forceMount>

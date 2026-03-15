@@ -188,50 +188,10 @@ function ProbeSelect({ value, probeNames, onChange }: ProbeSelectProps) {
   )
 }
 
-// ── Alert toggles ─────────────────────────────────────────────────────────────
-
-interface AlertTogglesProps {
-  alertNames: string[]
-  selected: string[] | undefined
-  onChange: (v: string[]) => void
-}
-
-function AlertToggles({ alertNames, selected, onChange }: AlertTogglesProps) {
-  if (alertNames.length === 0) return null
-  return (
-    <div className="flex flex-col gap-2">
-      <Label>Alerts</Label>
-      <div className="flex flex-wrap gap-2">
-        {alertNames.map((alertName) => {
-          const checked = selected?.includes(alertName) ?? false
-          return (
-            <button
-              key={alertName}
-              type="button"
-              onClick={() => {
-                const current = selected ?? []
-                onChange(checked ? current.filter((a) => a !== alertName) : [...current, alertName])
-              }}
-              className={`px-2 py-1 rounded text-xs border transition-colors ${
-                checked
-                  ? 'bg-primary text-primary-foreground border-primary'
-                  : 'bg-background border-border text-muted-foreground hover:border-foreground'
-              }`}
-            >
-              {alertName}
-            </button>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
 // ── Main form ─────────────────────────────────────────────────────────────────
 
 export function TargetForm({ selection, config, dispatch }: TargetFormProps) {
   const probeNames = config.probes.map((p) => p.name)
-  const alertNames = config.alerts.map((a) => a.name)
 
   if (selection.kind === 'globals') {
     const globals = config.targetGlobals
@@ -381,8 +341,6 @@ export function TargetForm({ selection, config, dispatch }: TargetFormProps) {
 
         <ProbeSelect value={group.probe} probeNames={probeNames} onChange={(v) => upd({ probe: v })} />
 
-        <AlertToggles alertNames={alertNames} selected={group.alerts} onChange={(v) => upd({ alerts: v })} />
-
         <Separator />
 
         <div className="flex flex-col gap-2">
@@ -454,8 +412,6 @@ export function TargetForm({ selection, config, dispatch }: TargetFormProps) {
         </div>
 
         <ProbeSelect value={target.probe} probeNames={probeNames} onChange={(v) => upd({ probe: v })} />
-
-        <AlertToggles alertNames={alertNames} selected={target.alerts} onChange={(v) => upd({ alerts: v })} />
 
         <Separator />
 

@@ -5,9 +5,7 @@ import type {
   TargetGroup,
   Target,
   Probe,
-  Alert,
   TargetGlobals,
-  AlertGlobals,
 } from '@/lib/types'
 import { generateConfig } from '@/lib/generate'
 
@@ -31,11 +29,6 @@ const initialConfig: SmokePingConfig = {
       extraFields: {},
     },
   ],
-  alertGlobals: {
-    to: '',
-    from: '',
-  },
-  alerts: [],
 }
 
 function loadConfig(): SmokePingConfig {
@@ -50,7 +43,6 @@ function loadConfig(): SmokePingConfig {
 
 export type Action =
   | { type: 'UPDATE_TARGET_GLOBALS'; payload: Partial<TargetGlobals> }
-  | { type: 'UPDATE_ALERT_GLOBALS'; payload: Partial<AlertGlobals> }
   | { type: 'ADD_SECTION' }
   | { type: 'UPDATE_SECTION'; id: string; payload: Partial<Omit<TargetSection, 'groups'>> }
   | { type: 'DELETE_SECTION'; id: string }
@@ -63,9 +55,6 @@ export type Action =
   | { type: 'ADD_PROBE'; payload: Probe }
   | { type: 'UPDATE_PROBE'; id: string; payload: Partial<Probe> }
   | { type: 'DELETE_PROBE'; id: string }
-  | { type: 'ADD_ALERT'; payload: Alert }
-  | { type: 'UPDATE_ALERT'; id: string; payload: Partial<Alert> }
-  | { type: 'DELETE_ALERT'; id: string }
   | { type: 'REORDER_SECTIONS'; fromId: string; toId: string; position: 'before' | 'after' }
   | { type: 'REORDER_GROUPS'; sectionId: string; fromId: string; toId: string; position: 'before' | 'after' }
   | { type: 'REORDER_TARGETS'; sectionId: string; groupId: string; fromId: string; toId: string; position: 'before' | 'after' }
@@ -86,9 +75,6 @@ function reducer(state: SmokePingConfig, action: Action): SmokePingConfig {
   switch (action.type) {
     case 'UPDATE_TARGET_GLOBALS':
       return { ...state, targetGlobals: { ...state.targetGlobals, ...action.payload } }
-
-    case 'UPDATE_ALERT_GLOBALS':
-      return { ...state, alertGlobals: { ...state.alertGlobals, ...action.payload } }
 
     case 'ADD_SECTION':
       return {
@@ -246,20 +232,6 @@ function reducer(state: SmokePingConfig, action: Action): SmokePingConfig {
 
     case 'DELETE_PROBE':
       return { ...state, probes: state.probes.filter((p) => p.id !== action.id) }
-
-    case 'ADD_ALERT':
-      return { ...state, alerts: [...state.alerts, action.payload] }
-
-    case 'UPDATE_ALERT':
-      return {
-        ...state,
-        alerts: state.alerts.map((a) =>
-          a.id === action.id ? { ...a, ...action.payload } : a
-        ),
-      }
-
-    case 'DELETE_ALERT':
-      return { ...state, alerts: state.alerts.filter((a) => a.id !== action.id) }
 
     case 'REORDER_SECTIONS':
       return { ...state, sections: reorder(state.sections, action.fromId, action.toId, action.position) }
