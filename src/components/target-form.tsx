@@ -1,6 +1,7 @@
 import { Plus, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
 import {
   Select,
@@ -116,30 +117,28 @@ function DualStackHostField({
               />
             </div>
           )}
-          <div className="flex flex-col gap-2">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <Switch
+                id={`${keyName}-same-host`}
                 checked={!!sameHost}
-                onChange={(e) => onSameHostChange(e.target.checked || undefined)}
-                className="h-3.5 w-3.5 rounded border-border accent-primary"
+                onCheckedChange={(v) => onSameHostChange(v || undefined)}
               />
-              <span className="text-xs text-muted-foreground">
+              <Label htmlFor={`${keyName}-same-host`} className="text-xs font-normal text-muted-foreground cursor-pointer">
                 Same host for IPv4 and IPv6
-              </span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
+              </Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                id={`${keyName}-combined`}
                 checked={!!showCombined}
-                onChange={(e) => onShowCombinedChange(e.target.checked || undefined)}
-                className="h-3.5 w-3.5 rounded border-border accent-primary"
+                onCheckedChange={(v) => onShowCombinedChange(v || undefined)}
               />
-              <span className="text-xs text-muted-foreground">
+              <Label htmlFor={`${keyName}-combined`} className="text-xs font-normal text-muted-foreground cursor-pointer">
                 Combined chart — also generates{' '}
                 <span className="font-mono text-foreground">{keyName}_combined</span>
-              </span>
-            </label>
+              </Label>
+            </div>
           </div>
         </div>
       ) : (

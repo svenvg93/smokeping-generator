@@ -2,6 +2,17 @@ import { useState } from 'react'
 import { ChevronRight, ChevronDown, Plus, Trash2, Settings, GripVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { cn } from '@/lib/utils'
 import type { TargetSection, Selection } from '@/lib/types'
 import type { Action } from '@/hooks/use-smokeping-store'
@@ -182,21 +193,39 @@ export function TargetTree({ sections, selection, onSelect, dispatch }: TargetTr
                 </TooltipTrigger>
                 <TooltipContent side="right">Add group</TooltipContent>
               </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-destructive"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      dispatch({ type: 'DELETE_SECTION', id: section.id })
-                    }}
-                    aria-label="Delete section"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="right">Delete section</TooltipContent>
-              </Tooltip>
+              <AlertDialog>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-destructive"
+                        onClick={(e) => e.stopPropagation()}
+                        aria-label="Delete section"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </AlertDialogTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">Delete section</TooltipContent>
+                </Tooltip>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete section "{section.key}"?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will delete the section and all its groups and targets.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      onClick={() => dispatch({ type: 'DELETE_SECTION', id: section.id })}
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
 
@@ -267,21 +296,39 @@ export function TargetTree({ sections, selection, onSelect, dispatch }: TargetTr
                       </TooltipTrigger>
                       <TooltipContent side="right">Add target</TooltipContent>
                     </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-destructive"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            dispatch({ type: 'DELETE_GROUP', sectionId: section.id, id: group.id })
-                          }}
-                          aria-label="Delete group"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="right">Delete group</TooltipContent>
-                    </Tooltip>
+                    <AlertDialog>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <AlertDialogTrigger asChild>
+                            <button
+                              className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-destructive"
+                              onClick={(e) => e.stopPropagation()}
+                              aria-label="Delete group"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </AlertDialogTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent side="right">Delete group</TooltipContent>
+                      </Tooltip>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete group "{group.key}"?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will delete the group and all its targets.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            onClick={() => dispatch({ type: 'DELETE_GROUP', sectionId: section.id, id: group.id })}
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
 
@@ -350,26 +397,39 @@ export function TargetTree({ sections, selection, onSelect, dispatch }: TargetTr
                           {target.key}
                         </button>
                         <div className="flex gap-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-destructive"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  dispatch({
-                                    type: 'DELETE_TARGET',
-                                    sectionId: section.id,
-                                    groupId: group.id,
-                                    id: target.id,
-                                  })
-                                }}
-                                aria-label="Delete target"
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent side="right">Delete target</TooltipContent>
-                          </Tooltip>
+                          <AlertDialog>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <AlertDialogTrigger asChild>
+                                  <button
+                                    className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-destructive"
+                                    onClick={(e) => e.stopPropagation()}
+                                    aria-label="Delete target"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </button>
+                                </AlertDialogTrigger>
+                              </TooltipTrigger>
+                              <TooltipContent side="right">Delete target</TooltipContent>
+                            </Tooltip>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete target "{target.key}"?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This will permanently remove this target from the configuration.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  onClick={() => dispatch({ type: 'DELETE_TARGET', sectionId: section.id, groupId: group.id, id: target.id })}
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </div>
                     </div>

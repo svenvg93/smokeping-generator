@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { Activity, Github } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
 import { ModeToggle } from '@/components/mode-toggle'
+import { Toaster } from '@/components/ui/sonner'
 import { useSmokePingStore } from '@/hooks/use-smokeping-store'
 import type { Selection } from '@/lib/types'
 import { TargetsTab } from '@/components/targets-tab'
@@ -40,9 +42,23 @@ export default function App() {
         <Tabs defaultValue="targets" className="flex flex-col h-full">
           <TabsList className="w-fit mb-4">
             <TabsTrigger value="targets">Targets</TabsTrigger>
-            <TabsTrigger value="probes">Probes</TabsTrigger>
-            <TabsTrigger value="alerts">Alerts</TabsTrigger>
-            <TabsTrigger value="preview">Preview</TabsTrigger>
+            <TabsTrigger value="probes" className="gap-2">
+              Probes
+              {config.probes.length > 0 && (
+                <Badge variant="secondary" className="h-4 min-w-4 px-1 text-[10px]">
+                  {config.probes.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="alerts" className="gap-2">
+              Alerts
+              {config.alerts.length > 0 && (
+                <Badge variant="secondary" className="h-4 min-w-4 px-1 text-[10px]">
+                  {config.alerts.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="preview">Configuration</TabsTrigger>
           </TabsList>
 
           <TabsContent value="targets" className="flex-1 mt-0">
@@ -67,11 +83,12 @@ export default function App() {
             />
           </TabsContent>
 
-          <TabsContent value="preview" className="mt-0">
+          <TabsContent value="preview" className="mt-0" forceMount hidden={true}>
             <PreviewTab preview={preview} />
           </TabsContent>
         </Tabs>
       </main>
+      <Toaster />
     </div>
   )
 }

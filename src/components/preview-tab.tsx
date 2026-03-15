@@ -1,4 +1,5 @@
-import { Download, Check, Copy } from 'lucide-react'
+import { Check, Copy } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 
@@ -9,39 +10,23 @@ interface PreviewTabProps {
 export function PreviewTab({ preview }: PreviewTabProps) {
   const { copied, copy } = useCopyToClipboard()
 
-  function handleDownload() {
-    const blob = new Blob([preview], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'smokeping.conf'
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Generated SmokePing configuration file
+          Generated SmokePing configuration
         </p>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => copy(preview)}
-          >
-            {copied ? (
-              <><Check className="h-4 w-4 mr-1.5" /> Copied</>
-            ) : (
-              <><Copy className="h-4 w-4 mr-1.5" /> Copy</>
-            )}
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleDownload}>
-            <Download className="h-4 w-4 mr-1.5" />
-            Download
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => { copy(preview); toast.success('Copied to clipboard') }}
+        >
+          {copied ? (
+            <><Check className="h-4 w-4 mr-1.5" /> Copied</>
+          ) : (
+            <><Copy className="h-4 w-4 mr-1.5" /> Copy</>
+          )}
+        </Button>
       </div>
       <textarea
         readOnly
