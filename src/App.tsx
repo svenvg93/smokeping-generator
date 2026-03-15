@@ -83,7 +83,7 @@ export default function App() {
             />
           </TabsContent>
 
-          <TabsContent value="preview" className="mt-0" forceMount hidden={true}>
+          <TabsContent value="preview" className="mt-0 data-[state=inactive]:hidden" forceMount>
             <PreviewTab preview={preview} />
           </TabsContent>
         </Tabs>

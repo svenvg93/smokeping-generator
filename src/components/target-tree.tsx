@@ -171,7 +171,10 @@ export function TargetTree({ sections, selection, onSelect, dispatch }: TargetTr
             </button>
             <button
               className="flex-1 text-left text-sm py-1 truncate"
-              onClick={() => onSelect({ kind: 'section', sectionId: section.id })}
+              onClick={() => {
+                onSelect({ kind: 'section', sectionId: section.id })
+                if (section.groups.length > 0) toggleSection(section.id)
+              }}
             >
               <span className="text-muted-foreground mr-1">+</span>
               {section.key}
@@ -274,7 +277,10 @@ export function TargetTree({ sections, selection, onSelect, dispatch }: TargetTr
                   </button>
                   <button
                     className="flex-1 text-left text-sm py-1 truncate"
-                    onClick={() => onSelect({ kind: 'group', sectionId: section.id, groupId: group.id })}
+                    onClick={() => {
+                      onSelect({ kind: 'group', sectionId: section.id, groupId: group.id })
+                      if (group.targets.length > 0) toggleGroup(group.id)
+                    }}
                   >
                     <span className="text-muted-foreground mr-1">++</span>
                     {group.key}
