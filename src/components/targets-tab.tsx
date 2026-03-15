@@ -119,7 +119,7 @@ export function TargetsTab({ config, selection, onSelect, dispatch }: TargetsTab
                     <Upload className="h-3.5 w-3.5" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Import JSON / YAML</TooltipContent>
+                <TooltipContent>Import .conf</TooltipContent>
               </Tooltip>
 
             </div>

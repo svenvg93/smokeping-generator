@@ -1,4 +1,3 @@
-import yaml from 'js-yaml'
 import type {
   SmokePingConfig,
   Probe,
@@ -239,38 +238,12 @@ function importFromSmokePingConf(text: string): SmokePingConfig {
 
 // ── Public API ─────────────────────────────────────────────────────────────
 
-export function exportToJson(config: SmokePingConfig): string {
-  return JSON.stringify(config, null, 2)
-}
-
-export function exportToYaml(config: SmokePingConfig): string {
-  return yaml.dump(config, { indent: 2 })
-}
-
-export function exportToConf(config: SmokePingConfig): string {
-  return generateConfig(config)
-}
-
 export function importFromText(text: string): SmokePingConfig {
   const trimmed = text.trim()
-
-  if (trimmed.startsWith('{')) {
-    const parsed = JSON.parse(trimmed) as SmokePingConfig
-    if (!Array.isArray(parsed.sections)) throw new Error('Invalid config: missing sections')
-    if (!Array.isArray(parsed.probes)) throw new Error('Invalid config: missing probes')
-    return parsed
+  if (!trimmed.includes('*** Targets ***') && !trimmed.includes('*** Probes ***')) {
+    throw new Error('Invalid config: expected a SmokePing file')
   }
-
-  if (trimmed.includes('*** Targets ***') || trimmed.includes('*** Probes ***')) {
-    return importFromSmokePingConf(trimmed)
-  }
-
-  // YAML
-  const parsed = yaml.load(trimmed) as SmokePingConfig
-  if (!parsed || typeof parsed !== 'object') throw new Error('Invalid config: expected an object')
-  if (!Array.isArray(parsed.sections)) throw new Error('Invalid config: missing sections')
-  if (!Array.isArray(parsed.probes)) throw new Error('Invalid config: missing probes')
-  return parsed
+  return importFromSmokePingConf(trimmed)
 }
 
 export function downloadFile(content: string, filename: string, mimeType: string) {

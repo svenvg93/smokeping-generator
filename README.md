@@ -9,7 +9,7 @@ A browser-based visual editor for generating [SmokePing](https://oss.oetiker.ch/
 - **Visual target tree** — build a Section → Group → Target hierarchy with drag-and-drop reordering
 - **Dual-stack support** — configure separate IPv4 and IPv6 hosts per target or group, with optional combined charts
 - **Probe management** — define multiple probe types (FPing, DNS, HTTP, Curl, TCPPing, and more) with custom binaries and extra fields
-- **Import / Export** — import existing SmokePing `.conf` files, JSON, or YAML; export to all three formats
+- **Import** — load an existing SmokePing file to continue editing
 - **Live preview** — the Configuration tab updates in real time as you make changes
 - **Persisted state** — configuration is saved to `localStorage` and survives page reloads
 
@@ -22,7 +22,7 @@ A browser-based visual editor for generating [SmokePing](https://oss.oetiker.ch/
 
 ### Importing an existing config
 
-Click the upload icon in the top-left of the Targets tree to import a `.conf`, `.json`, or `.yaml` file. The app will parse it and populate the editor.
+Click the upload icon in the top-left of the Targets tree to import a SmokePing file. The app will parse it and populate the editor. To export, use the **Copy** button in the Configuration tab.
 
 ## Development
 
